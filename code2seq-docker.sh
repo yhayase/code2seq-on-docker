@@ -6,9 +6,9 @@ unset TEMP
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o cgm:t: --long force-cpu,force-gpu,model:,test-data: \
-              -n $(basename $0) -- "$@")
-# usage() { echo "Usage: $0 [-c|-g]  1>&2; exit 1; }
+TEMP=$(getopt --options cgm:t: --longoptions force-cpu,force-gpu,model:,test-data: \
+              --name $(basename $0) -- "$@")
+# usage() { echo "Usage: $0 [-c|-g] [-m model_file] [-t test_file] 1>&2; exit 1; }
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -48,3 +48,4 @@ cd "$(dirname $0)"
 docker run -u $(id -u):$(id -g) $GPU_FLAGS -it -v $(pwd):/code2seq -w /code2seq --rm code2seq:1 \
  env TF_FORCE_GPU_ALLOW_GROWTH=true \
  python3 code2seq.py --load "$MODEL_FILE" --test "$TEST_FILE"
+ #python3 code2seq.py --load "$MODEL_FILE" --predict
