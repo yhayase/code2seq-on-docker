@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from config import Config
 from interactive_predict import InteractivePredictor
+from file_predict import FilePredictor
 from model import Model
 
 if __name__ == '__main__':
@@ -21,6 +22,9 @@ if __name__ == '__main__':
                         help='if specified and loading a trained model, release the loaded model for a smaller model '
                              'size.')
     parser.add_argument('--predict', action='store_true')
+    parser.add_argument("--batch_predict", dest="batch_predict_path",
+                        help="path to java source paths",  metavar="FILE", 
+                        required=False)
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--seed', type=int, default=239)
     args = parser.parse_args()
@@ -42,6 +46,15 @@ if __name__ == '__main__':
         print('Accuracy: ' + str(results))
         print('Precision: ' + str(precision) + ', recall: ' + str(recall) + ', F1: ' + str(f1))
         print('Rouge: ', rouge)
+    if args.batch_predict_path:
+        predictor = FilePredictor(config, model)
+        for source_path in open(args.batch_predict_path):
+            source_path = source_path.rstrip('\n')
+            prediction_results = predictor.predict(source_path)
+            for index, method_prediction in prediction_results.items():
+                for predicted_seq in method_prediction.predictions:
+                    print('\t%s' % predicted_seq.prediction)
+
     if args.predict:
         predictor = InteractivePredictor(config, model)
         predictor.predict()

@@ -47,5 +47,6 @@ fi
 cd "$(dirname $0)"
 docker run -u $(id -u):$(id -g) $GPU_FLAGS -it -v $(pwd):/code2seq -w /code2seq --rm code2seq:1 \
  env TF_FORCE_GPU_ALLOW_GROWTH=true \
- python3 code2seq.py --load "$MODEL_FILE" --test "$TEST_FILE"
+ python3 code2seq.py --load "$MODEL_FILE" --batch_predict java-src/paths.txt
+ #python3 code2seq.py --load "$MODEL_FILE" --test "$TEST_FILE"
  #python3 code2seq.py --load "$MODEL_FILE" --predict
