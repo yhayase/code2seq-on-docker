@@ -52,8 +52,9 @@ if __name__ == '__main__':
             source_path = source_path.rstrip('\n')
             prediction_results = predictor.predict(source_path)
             for index, method_prediction in prediction_results.items():
+                print('  %s:' % method_prediction.original_name)
                 for predicted_seq in method_prediction.predictions:
-                    print('\t%s' % predicted_seq.prediction)
+                    print('    %s with probability %f' % (predicted_seq.prediction, predicted_seq.score))
 
     if args.predict:
         predictor = InteractivePredictor(config, model)

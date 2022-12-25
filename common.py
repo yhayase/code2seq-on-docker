@@ -95,11 +95,11 @@ class Common:
                             pc_info = pc_info_dict[context]
                             current_timestep_paths.append((attention.item(), pc_info))
 
-                    current_method_prediction_results.append_prediction(predicted_word, current_timestep_paths)
+                    current_method_prediction_results.append_prediction(predicted_word, current_timestep_paths, None)
             else:
-                for predicted_seq in top_suggestions:
+                for idx, predicted_seq in enumerate(top_suggestions):
                     filtered_seq = [word for word in predicted_seq if Common.legal_method_names_checker(word)]
-                    current_method_prediction_results.append_prediction(filtered_seq, None)
+                    current_method_prediction_results.append_prediction(filtered_seq, None, top_scores[idx])
 
             prediction_results[results_counter] = current_method_prediction_results
             results_counter += 1
@@ -117,12 +117,13 @@ class PredictionResults:
         self.original_name = original_name
         self.predictions = list()
 
-    def append_prediction(self, name, current_timestep_paths):
-        self.predictions.append(SingleTimeStepPrediction(name, current_timestep_paths))
+    def append_prediction(self, name, current_timestep_paths, score):
+        self.predictions.append(SingleTimeStepPrediction(name, current_timestep_paths, score))
 
 class SingleTimeStepPrediction:
-    def __init__(self, prediction, attention_paths):
+    def __init__(self, prediction, attention_paths, score:int):
         self.prediction = prediction
+        self.score: int = score
         if attention_paths is not None:
             paths_with_scores = []
             for attention_score, pc_info in attention_paths:

@@ -24,7 +24,7 @@ class Config:
         config.RNN_DROPOUT_KEEP_PROB = 0.5
         config.BIRNN = True
         config.RANDOM_CONTEXTS = True
-        config.BEAM_WIDTH = 0
+        config.BEAM_WIDTH = 3
         config.USE_MOMENTUM = True
         return config
 
