@@ -63,12 +63,12 @@ if __name__ == '__main__':
         c2s_predictor = C2SPredictor(config, model)
         with open(args.predict_c2s_file) as f:
             c2s_lines = f.read().splitlines()
-            for line in c2s_lines:
+            for i, line in enumerate(c2s_lines):
                 prediction_results = c2s_predictor.predict([line])
-                for index, method_prediction in prediction_results.items():
-                    print('  %s:' % method_prediction.original_name)
-                    for predicted_seq in method_prediction.predictions:
-                        print('    %s with probability %f' % (predicted_seq.prediction, predicted_seq.score))
+                for _, method_prediction in prediction_results.items():
+                    header = [str(i), method_prediction.original_name]
+                    for j, predicted_seq in enumerate(method_prediction.predictions):
+                        print("\t".join(header + [str(j), str(predicted_seq.score), "|".join(predicted_seq.prediction)]))
     elif args.predict:
         predictor = InteractivePredictor(config, model)
         predictor.predict()
