@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import numpy as np
+from c2s_predict import C2SPredictor
 import tensorflow as tf
 
 from config import Config
@@ -22,8 +23,11 @@ if __name__ == '__main__':
                         help='if specified and loading a trained model, release the loaded model for a smaller model '
                              'size.')
     parser.add_argument('--predict', action='store_true')
-    parser.add_argument("--batch_predict", dest="batch_predict_path",
+    parser.add_argument("--batch_java_src", dest="batch_java_src_path_file",
                         help="path to java source paths",  metavar="FILE", 
+                        required=False)
+    parser.add_argument("--predict_c2s", dest="predict_c2s_file",
+                        help="path to c2s file for prediction",  metavar="FILE", 
                         required=False)
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--seed', type=int, default=239)
@@ -41,24 +45,33 @@ if __name__ == '__main__':
     print('Created model')
     if config.TRAIN_PATH:
         model.train()
-    if config.TEST_PATH and not args.data_path:
+    elif config.TEST_PATH and not args.data_path:
         results, precision, recall, f1, rouge = model.evaluate()
         print('Accuracy: ' + str(results))
         print('Precision: ' + str(precision) + ', recall: ' + str(recall) + ', F1: ' + str(f1))
         print('Rouge: ', rouge)
-    if args.batch_predict_path:
+    elif args.batch_java_src_path_file:
         predictor = FilePredictor(config, model)
-        for source_path in open(args.batch_predict_path):
+        for source_path in open(args.batch_java_src_path_file):
             source_path = source_path.rstrip('\n')
             prediction_results = predictor.predict(source_path)
             for index, method_prediction in prediction_results.items():
                 print('  %s:' % method_prediction.original_name)
                 for predicted_seq in method_prediction.predictions:
                     print('    %s with probability %f' % (predicted_seq.prediction, predicted_seq.score))
-
-    if args.predict:
+    elif args.predict_c2s_file:
+        c2s_predictor = C2SPredictor(config, model)
+        with open(args.predict_c2s_file) as f:
+            c2s_lines = f.read().splitlines()
+            for line in c2s_lines:
+                prediction_results = c2s_predictor.predict([line])
+                for index, method_prediction in prediction_results.items():
+                    print('  %s:' % method_prediction.original_name)
+                    for predicted_seq in method_prediction.predictions:
+                        print('    %s with probability %f' % (predicted_seq.prediction, predicted_seq.score))
+    elif args.predict:
         predictor = InteractivePredictor(config, model)
         predictor.predict()
-    if args.release and args.load_path:
+    elif args.release and args.load_path:
         model.evaluate(release=True)
     model.close_session()

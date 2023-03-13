@@ -6,9 +6,9 @@ unset TEMP
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt --options cgm:t: --longoptions force-cpu,force-gpu,model:,test-data: \
+TEMP=$(getopt --options dcgm:t: --longoptions debug,force-cpu,force-gpu,model:,test-data: \
               --name $(basename $0) -- "$@")
-# usage() { echo "Usage: $0 [-c|-g] [-m model_file] [-t test_file] 1>&2; exit 1; }
+# usage() { echo "Usage: $0 [-d] [-c|-g] [-m model_file | -t test_file] 1>&2; exit 1; }
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -18,9 +18,11 @@ eval set -- "$TEMP"
 USE_GPU=auto
 MODEL_FILE="./models/java-large-model/model_iter52.release"
 TEST_FILE="./data/java-large/java-large.test.c2s"
+DEBUG_OPTS=""
  
 while true; do
   case "$1" in
+    -d | --debug ) DEBUG_OPTS="-m pdb"; shift ;;
     -c | --force-cpu ) USE_GPU=false; shift ;;
     -g | --force-gpu ) USE_GPU=true; shift ;;
     -m | --model ) MODEL_FILE="$2"; shift 2 ;;
@@ -47,6 +49,8 @@ fi
 cd "$(dirname $0)"
 docker run -u $(id -u):$(id -g) $GPU_FLAGS -it -v $(pwd):/code2seq -w /code2seq --rm code2seq:1 \
  env TF_FORCE_GPU_ALLOW_GROWTH=true \
- python3 code2seq.py --load "$MODEL_FILE" --batch_predict java-src/paths.txt
- #python3 code2seq.py --load "$MODEL_FILE" --test "$TEST_FILE"
- #python3 code2seq.py --load "$MODEL_FILE" --predict
+ python3 $DEBUG_OPTS code2seq.py --load "$MODEL_FILE" --predict_c2s $TEST_FILE
+exit
+ python3 $DEBUG_OPTS code2seq.py --load "$MODEL_FILE" --batch_java_src java-src/paths.txt
+ python3 $DEBUG_OPTS code2seq.py --load "$MODEL_FILE" --test "$TEST_FILE"
+ python3 $DEBUG_OPTS code2seq.py --load "$MODEL_FILE" --predict

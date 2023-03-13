@@ -91,7 +91,7 @@ class Common:
                     for context, attention in [(key, attention_timestep[key]) for key in
                                                sorted(attention_timestep, key=attention_timestep.get, reverse=True)][
                                               :topk]:
-                        if context in pc_info_dict:
+                        if pc_info_dict and context in pc_info_dict:
                             pc_info = pc_info_dict[context]
                             current_timestep_paths.append((attention.item(), pc_info))
 
