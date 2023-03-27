@@ -27,7 +27,7 @@ class C2SPredictor:
         for i, line in enumerate(predict_lines):
             cols = line.split(' ')
             if len(cols) < self.config.DATA_NUM_CONTEXTS + 1:
-                cols.append([''] * (self.config.DATA_NUM_CONTEXTS + 1 - len(cols)))
+                cols += [''] * (self.config.DATA_NUM_CONTEXTS + 1 - len(cols))
             else:
                 del cols[self.config.DATA_NUM_CONTEXTS + 1:]
             predict_lines[i] = ' '.join(cols)
